@@ -27,6 +27,7 @@ static void my_function1(struct wl_client *client, struct wl_resource *resource,
 
   // 假设我们需要响应客户端
   my_interface_send_onfunction1(resource, x, y, w, h);
+
 }
 
 // 这个结构体定义了接口的实现，它包含了接口中函数的实际实现
