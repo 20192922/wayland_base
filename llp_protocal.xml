@@ -1,5 +1,5 @@
-    <protocol name="my_extension">
-      <interface name="my_interface" version="1">
+    <protocol name="llp_extension">
+      <interface name="llp_interface" version="1">
         <request name="function1">
           <arg name="x" type="int"/>
           <arg name="y" type="int"/>
@@ -14,4 +14,3 @@
         </event>
       </interface>
     </protocol>
-

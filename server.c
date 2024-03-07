@@ -26,12 +26,12 @@ static void my_function1(struct wl_client *client, struct wl_resource *resource,
   printf("Function1 called with x=%d, y=%d, w=%d, h=%d\n", x, y, w, h);
 
   // 假设我们需要响应客户端
-  my_interface_send_onfunction1(resource, x, y, w, h);
+  llp_interface_send_onfunction1(resource, x, y, w, h);
 
 }
 
 // 这个结构体定义了接口的实现，它包含了接口中函数的实际实现
-static const struct my_interface_interface my_implementation = {
+static const struct llp_interface_interface my_implementation = {
     my_function1,
 };
 
@@ -40,7 +40,7 @@ static void bind_my_interface(struct wl_client *client, void *data, uint32_t ver
   struct wl_resource *resource;
 
   // 创建一个新的资源实例
-  resource = wl_resource_create(client, &my_interface_interface, version, id);
+  resource = wl_resource_create(client, &llp_interface_interface, version, id);
 
   // 将我们的实现与新创建的资源关联起来
   wl_resource_set_implementation(resource, &my_implementation, NULL, NULL);
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   // 添加我们的扩展协议到 Wayland registry
   //global = ewl_global_creat(display, &my_interface_interface, 1, NULL, bind_my_interface);
   wl_global_create(display,&wl_compositor_interface,4,NULL,bind_compositor);
-  wl_global_create(display, &my_interface_interface, 1, NULL, bind_my_interface);
+  wl_global_create(display, &llp_interface_interface, 1, NULL, bind_my_interface);
 
   // 启动 Wayland 服务端
   if (wl_display_add_socket(display, "wayland-1")) {
