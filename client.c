@@ -4,6 +4,7 @@
 #include "my_protocol-client-protocol.h"
 #include <string.h>
 struct llp_interface *my_interface;
+/*创建这个监听结构体，以便服务器回调。wayland的通信方式，*/
 static void on_function1(void *data, struct llp_interface *my_interface, int32_t x, int32_t y, int32_t w, int32_t h) {
   printf("onfunction1 event: x=%d, y=%d, w=%d, h=%d\n", x, y, w, h);
 }
