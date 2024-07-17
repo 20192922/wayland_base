@@ -1,13 +1,15 @@
 #include <wayland-server.h>
 #include "my_protocol-server-protocol.h"
 #include <stdio.h>
-// 定义您的 compositor 接口的函数
+typedef struct {
+  char * str;
+  int num;
+}msg;
+
 static void compositor_create_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
-    // 在这里实现创建 surface 的逻辑
 }
 
 static void compositor_create_region(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
-    // 在这里实现创建 region 的逻辑
 }
 
 // 创建 compositor 接口的实现结构体
@@ -24,7 +26,8 @@ static void bind_compositor(struct wl_client *client, void *data, uint32_t versi
 static void my_function1(struct wl_client *client, struct wl_resource *resource, int32_t x, int32_t y, int32_t w, int32_t h) {
   // 这里处理您的业务逻辑。例如，保存这些参数或者更改窗口的大小等。
   printf("Function1 called with x=%d, y=%d, w=%d, h=%d\n", x, y, w, h);
-
+  msg *msg1 = (msg *)wl_resource_get_user_data(resource);
+  printf("the msg:%s %d\n",msg1->str,msg1->num);
   // 假设我们需要响应客户端
   llp_interface_send_onfunction1(resource, x, y, w, h);
 
@@ -38,19 +41,20 @@ static const struct llp_interface_interface my_implementation = {
 // 当客户端请求创建一个 my_interface 实例时调用此函数
 static void bind_my_interface(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
   struct wl_resource *resource;
-
+  
   // 创建一个新的资源实例
   resource = wl_resource_create(client, &llp_interface_interface, version, id);
-
+  
   // 将我们的实现与新创建的资源关联起来
-  wl_resource_set_implementation(resource, &my_implementation, NULL, NULL);
+  wl_resource_set_implementation(resource, &my_implementation, data, NULL);
 }
 
 int main(int argc, char **argv) {
   struct wl_display *display;
   struct wl_event_loop *event_loop;
   struct wl_global *global;
-
+  
+  msg msg1 = {"hello,hh",5};
   // 创建 Wayland display
   display = wl_display_create();
   printf("1\n");
@@ -60,7 +64,7 @@ int main(int argc, char **argv) {
   // 添加我们的扩展协议到 Wayland registry
   //global = ewl_global_creat(display, &my_interface_interface, 1, NULL, bind_my_interface);
   wl_global_create(display,&wl_compositor_interface,4,NULL,bind_compositor);
-  wl_global_create(display, &llp_interface_interface, 1, NULL, bind_my_interface);
+  wl_global_create(display, &llp_interface_interface, 1, &msg1, bind_my_interface);
 
   // 启动 Wayland 服务端
   if (wl_display_add_socket(display, "wayland-1")) {
@@ -71,7 +75,7 @@ int main(int argc, char **argv) {
   // 进入主事件循环
   //fprintf(stderr, "Entering Wayland event loop\n");
   printf("wait~\n");
-  wl_event_loop_dispatch(event_loop, -1);
+ // wl_event_loop_dispatch(event_loop, -1);
   wl_display_run(display);//good
   //wl_event_loop_dispatch(event_loop, -1);
 

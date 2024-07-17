@@ -289,3 +289,113 @@ static const struct llp_interface_listener my_listener = {on_function1,};
 
 static void on_function1(void *data, struct llp_interface *my_interface, int32_t x, int32_t y, int32_t w, int32_t h) {printf("onfunction1 event: x=%d, y=%d, w=%d, h=%d\n", x, y, w, h);}
 
+
+weston协议移植：
+
+协议：
+
+```xml
+<protocol name="llp_touch_extension">
+<interface name="llp_touch" version="1">
+    <description summary="LLP add to deliver touch information">
+      The llp_touch interface is exposed as a global object enabling clients
+      to deliver touch information from server to client.
+    </description>
+    <enum name="Touch_event">
+      <entry name="one_click" value="0" summary="one"/>
+      <entry name="pinch_in" value="1" summary="pinch_in"/>
+      <entry name="pinch_out" value="2" summary="pinch_out"/>
+      <entry name="swipe_lift" value="3" summary="swipe_lift"/>
+      <entry name="swipe_right" value="4" summary="swipe_right"/>
+      <entry name="swipe_up" value="5" summary="swipe_up"/>
+      <entry name="swipe_down" value="6" summary="swipe_down"/>
+      <entry name="double_click" value="7" summary="double"/>
+    </enum>
+    <request name="get_touch_event">
+      <description summary="get_touch_event">
+    	get_touch_event
+      </description>
+      <arg name="x" type="int"/>
+      <arg name="y" type="int"/>
+      <arg name="w" type="int"/>
+      <arg name="h" type="int"/>
+      <arg name="touch_event" type="int"/> 
+    </request>
+
+<event name="message_to_client">
+<description summary="send_touch_event">
+    send_touch_event
+  </description>
+  <arg name="x" type="int"/>
+  <arg name="y" type="int"/>
+  <arg name="w" type="int"/>
+  <arg name="h" type="int"/>
+  <arg name="touch_event" type="int"/> 
+</event>
+
+  </interface>
+  </protocol>
+```
+
+生成：llp_touch.c，touch-server-protocol.h，touch-client-protocol.h
+
+shell.h:+#include "touch-server-protocol.h"
+
+shell.c:
+
++static struct wl_resource *touch_resource = NULL;
+
+void get_touch_event(struct wl_client *client, struct wl_resource *resource, int32_t x, int32_t y, int32_t w, int32_t h, int32_t touch_event)
++{
+
+printf("get_touch called with x=%d, y=%d, w=%d, h=%d, touch_event = %d\n", x, y, w, h, touch_event);
+
+llp_touch_send_message_to_client(resource, x, y, w, h, touch_event);
++};
++static const struct llp_touch_interface ltouch_interface = {
+
+get_touch_event,
++};
++
+
+static void bind_llp_touch(struct wl_client *client, void *data, uint32_t version, uint32_t id)
++{
+
+struct wl_resource *resource;
+
+touch_resource = resource;
+
+...
+
+}
+
+wet_shell_init(struct weston_compositor *ec,
+ 						 &weston_desktop_shell_interface, 1,
+ 						 shell, bind_desktop_shell) == NULL)
+ 		return -1;
+-
+
+if (wl_global_create(ec->wl_display, &llp_touch_interface, 1, NULL, bind_llp_touch) == NULL)
+
+return -1;
+
+wl_global_create(ec->wl_display, &llp_interface_interface, 1, NULL, bind_my_interface);
+
+weston_compositor_get_time(&shell->child.deathstamp);
+
+diff --git a/meson.build b/meson.build
+index f984fc1..8162a4d 100755
+--- a/meson.build
++++ b/meson.build
+
+```c
+@@ -6,6 +6,7 @@ if get_option('shell-desktop')
+ 		'exposay.c',
+ 		'input-panel.c',
+ 		'llp_touch.c',
++		'my_protocol.c',
+ 		weston_desktop_shell_server_protocol_h,
+ 		weston_desktop_shell_protocol_c,
+ 		input_method_unstable_v1_server_protocol_h,
+```
+

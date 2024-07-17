@@ -9,3 +9,6 @@ new file:   touch_protocol.c
 deleted:    server1
 deleted:    server1.c --这两个文件不使用
 完成移植协议llp_protocal,llp_touch_protocol于imx8。
+
+--version2.0.1 
+增加参数的传递逻辑

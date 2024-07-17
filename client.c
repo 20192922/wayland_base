@@ -7,6 +7,7 @@ struct llp_interface *my_interface;
 /*创建这个监听结构体，以便服务器回调。wayland的通信方式，*/
 static void on_function1(void *data, struct llp_interface *my_interface, int32_t x, int32_t y, int32_t w, int32_t h) {
   printf("onfunction1 event: x=%d, y=%d, w=%d, h=%d\n", x, y, w, h);
+  printf("the data = %s\n",(char *)data);
 }
 
 static const struct llp_interface_listener my_listener = {
@@ -20,7 +21,7 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
   if (strcmp(interface, "llp_interface") == 0) {
     printf("%s\n",interface);
     my_interface = wl_registry_bind(registry, id, &llp_interface_interface, version);
-    llp_interface_add_listener(my_interface, &my_listener, NULL);
+    llp_interface_add_listener(my_interface, &my_listener, data);
   }
 }
 
@@ -36,15 +37,14 @@ static const struct wl_registry_listener registry_listener = {
 int main(int argc, char **argv) {
   struct wl_display *display;
   struct wl_registry *registry;
-
-  display = wl_display_connect("wayland-0");
+  char * str = "hello,client";
+  display = wl_display_connect("wayland-1");
   if (display == NULL) {
     fprintf(stderr, "Cannot connect to Wayland display\n");
     exit(EXIT_FAILURE);
   }
-  printf("1\n");
   registry = wl_display_get_registry(display);
-  wl_registry_add_listener(registry, &registry_listener, NULL);
+  wl_registry_add_listener(registry, &registry_listener, str);
 
   wl_display_dispatch(display);
 
